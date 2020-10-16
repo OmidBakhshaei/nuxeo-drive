@@ -47,40 +47,40 @@ jobs:
     #     packages:
     #     - appstream
 
-  - <<: *_build
-    name: macOS [.dmg]
-    os: osx
-    osx_image: xcode10.1  # macOS 10.13
-    env:
-      - KEYCHAIN_PATH="~/Library/Keychains/drive.keychain-db"
-      - SIGNING_ID="NUXEO CORP"
+  # - <<: *_build
+  #   name: macOS [.dmg]
+  #   os: osx
+  #   osx_image: xcode10.1  # macOS 10.13
+  #   env:
+  #     - KEYCHAIN_PATH="~/Library/Keychains/drive.keychain-db"
+  #     - SIGNING_ID="NUXEO CORP"
 
-  - <<: *_build
-    name: Windows [.exe]
-    os: windows
-    env:
-      - INNO_SETUP_VERSION="6.0.5"  # XXX_INNO_SETUP
-      - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
-      - SIGNING_ID="Nuxeo"
-      - SIGNTOOL_PATH="C:\Program Files (x86)\Windows Kits\10\bin\x86"
+  # - <<: *_build
+  #   name: Windows [.exe]
+  #   os: windows
+  #   env:
+  #     - INNO_SETUP_VERSION="6.0.5"  # XXX_INNO_SETUP
+  #     - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
+  #     - SIGNING_ID="Nuxeo"
+  #     - SIGNTOOL_PATH="C:\Program Files (x86)\Windows Kits\10\bin\x86"
 
-  - stage: Deploy
-    <<: *_before_script
-    script:
-      - |
-        if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then
-          # SSH key import
-          echo "${TRAVIS_DEPLOY_KEY}" | base64 --decode > private.key
-          chmod 0600 private.key
-          ssh-add private.key
-          rm private.key
+  # - stage: Deploy
+  #   <<: *_before_script
+  #   script:
+  #     - |
+  #       if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then
+  #         # SSH key import
+  #         echo "${TRAVIS_DEPLOY_KEY}" | base64 --decode > private.key
+  #         chmod 0600 private.key
+  #         ssh-add private.key
+  #         rm private.key
 
-          # Tel git to use the SSH access rather than HTTPS
-          git remote set-url origin git@github.com:nuxeo/nuxeo-drive.git
+  #         # Tel git to use the SSH access rather than HTTPS
+  #         git remote set-url origin git@github.com:nuxeo/nuxeo-drive.git
 
-          # Do the release
-          bash tools/release.sh --publish "$RELEASE_TYPE" || exit 1
-          bash tools/release.sh --create "$RELEASE_TYPE" || exit 1
-        fi
-    after_failure:
-      - bash tools/release.sh --cancel
+  #         # Do the release
+  #         bash tools/release.sh --publish "$RELEASE_TYPE" || exit 1
+  #         bash tools/release.sh --create "$RELEASE_TYPE" || exit 1
+  #       fi
+  #   after_failure:
+  #     - bash tools/release.sh --cancel

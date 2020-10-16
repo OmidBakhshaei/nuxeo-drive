@@ -24,20 +24,16 @@ remove_excluded_files() {
 
 check() {
     # Check AppImage conformity.
-    echo ">>> [AppImage] Extracting the AppImage"
-    cd dist
-    [ -f "squashfs-root" ] && rm -rf "squashfs-root"
-    ./*-x86_64.AppImage --appimage-extract
-    cd ..
-
     echo ">>> [AppImage] Checking the version"
-    ./dist/squashfs-root/AppRun --version
+    ./dist/nuxeo-drive-*-x86_64.AppImage --version
 
     echo ">>> [AppImage] Checking the AppImage conformity"
+    cd dist
+    [ -f "squashfs-root" ] && rm -rf "squashfs-root"
+    ./nuxeo-drive-*-x86_64.AppImage --appimage-extract
+    cd ..
     # TODO: remove "|| true" and find why this does not work
     ./tools/linux/appimage/appdir-lint.sh "$(pwd)/tools/linux/appimage" "$(pwd)/dist/squashfs-root" || true
-
-    echo ">>> [AppImage] Clean-up"
     rm -rf dist/squashfs-root
 
     return 0  # <-- Needed, do not remove!
@@ -70,18 +66,9 @@ create_package() {
 
     more_compatibility
 
-    echo ">>> [AppImage] Decompressing the AppImage tool"
-    cd build
-    [ -d "squashfs-root" ] && rm -frv "squashfs-root"
-    ./../tools/linux/appimage/appimagetool-x86_64.AppImage --appimage-extract
-    cd ..
-
     echo ">>> [AppImage ${app_version}] Creating the AppImage file"
     # --no-appstream because appstreamcli is not easily installable on CentOS
-    ./build/squashfs-root/AppRun --no-appstream "${app_dir}" "${output}"
-
-    echo ">>> [AppImage] Clean-up"
-    rm -rf squashfs-root
+    ./tools/linux/appimage/appimagetool-x86_64.AppImage --no-appstream "${app_dir}" "${output}"
 
     return 0  # <-- Needed, do not remove!
 }
